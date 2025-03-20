@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class Order implements Comparable<Order> {
   private final String temp; // ideal temperature
   private final int freshness; // freshness in seconds
 
+  @Setter
   private long lastUpdated;
 
   public Order(
@@ -38,8 +40,8 @@ public class Order implements Comparable<Order> {
     return new ObjectMapper().readValue(json, new TypeReference<List<Order>>() {});
   }
 
-  public void setLastUpdated(long timestamp) {
-    this.lastUpdated = System.currentTimeMillis();
+  public void updateLastUpdated() {
+    setLastUpdated(System.currentTimeMillis());
   }
 
   @Override

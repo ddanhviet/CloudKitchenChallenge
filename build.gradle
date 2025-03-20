@@ -20,6 +20,7 @@ dependencies {
     // https://github.com/simple-http/simple-http
     implementation 'com.simple-http:simple-http:1.4'
     implementation 'ch.qos.logback:logback-classic:1.5.16'
+    implementation 'org.hsqldb:hsqldb:2.7.1'
 }
 
 ext {

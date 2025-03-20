@@ -65,6 +65,11 @@ public class KitchenApplication {
       while (!Thread.currentThread().isInterrupted()) { // while not shutdown
         for (int i=0; i<rate; i++) {
           // receive order
+          // spin up new virtual thread to process per order
+           executorService.submit(() -> processOrder());
+          // how to check if rate is good?
+          // these threads all wait for removing order, have number of orders to process
+          // remove per order or remove in batch?
 
           // process order
         }
@@ -75,8 +80,15 @@ public class KitchenApplication {
       throw new RuntimeException(e);
     }
 
-    FoodDepot foodDepot = new FoodDepot();
-    updateFreshness(foodDepot);
+    FoodDepot foodDepot = new FoodDepot(rate);
+    updateFreshness(foodDepot); // background removing order that has no food freshness?
+  }
+
+  private void processOrder() {
+    // get order
+    // store order
+    // if order is not stored, discard
+    // if order is stored, pick up order
   }
 
   private void pickupOrder() {
