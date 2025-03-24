@@ -2,7 +2,7 @@ package com.css.challenge.service;
 
 import org.hsqldb.Server;
 
-public class DatabaseService {
+public class DatabaseServerService {
 
   public void start() {
     Server server = new Server();

@@ -11,6 +11,11 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 
+/**
+ * order table has current order values
+ * depot table has order that is stored
+ * action table has order action details
+ */
 public class DepotPersistenceService {
 
   static final String TABLE_ACTION = "action";
@@ -37,7 +42,7 @@ public class DepotPersistenceService {
 
   }
 
-  //TODO: factor out connection part
+  // TODO: factor out connection part
   public void storeOrder(String orderId, String option) throws SQLException {
     var connection = connectionPool.poll();
     inuseConnections.add(connection);
@@ -46,10 +51,11 @@ public class DepotPersistenceService {
     String insertSQL = "INSERT INTO " + TABLE_DEPOT + " (id, option) VALUES (" + orderId + ", " + option + ")";
     statement.executeUpdate(insertSQL);
 
-    connectionPool.add(connection);
     inuseConnections.remove(connection);
+    connectionPool.add(connection);
   }
 
+  // skeleton
   public List<Order> getOrders() throws SQLException {
     var connection = connectionPool.poll();
     var statement = connection.createStatement();
@@ -62,10 +68,31 @@ public class DepotPersistenceService {
       System.out.println("ID: " + rs.getInt("id") +
             ", Name: " + rs.getString("name"));
     }
+
+    inuseConnections.remove(connection);
+    connectionPool.add(connection);
+
     return orders;
   }
 
-  public void removeExpiredOrder(String orderId, String option) throws SQLException {
+  public void pickupOrder(String orderId) throws SQLException {
+    var connection = connectionPool.poll();
+    inuseConnections.add(connection);
+    var statement = connection.createStatement();
+
+    var deleteSQL = "DELETE FROM " + TABLE_DEPOT
+        + "WHERE orderId" + " = " + orderId + ";";
+    statement.executeUpdate(deleteSQL);
+
+    var actionSQL = "INSERT INTO " + TABLE_ACTION + " (timestamp, order_id, action)"
+        + "VALUES (" + System.currentTimeMillis() + ", "+ orderId + ", 'pickup');";
+    statement.executeUpdate(actionSQL);
+
+    inuseConnections.remove(connection);
+    connectionPool.add(connection);
+  }
+
+  public void removeExpiredOrders(String option) throws SQLException {
     var connection = connectionPool.poll();
     inuseConnections.add(connection);
     var statement = connection.createStatement();
@@ -73,10 +100,26 @@ public class DepotPersistenceService {
     String deleteSQL = "DELETE FROM " + TABLE_DEPOT
           + " JOIN " + TABLE_ORDER + " on orders.id = depot.id"
           + " WHERE " + TABLE_DEPOT + ".location = " + option
-          + " AND " + TABLE_ORDER + ".freshness <= 0";
+          + " AND " + TABLE_ORDER + ".freshness <= 0;";
     statement.executeUpdate(deleteSQL);
 
-    connectionPool.add(connection);
+    var actionSQL = "INSERT INTO " + TABLE_ACTION + " (timestamp, order_id, action)"
+        + "VALUES (CURRENT_TIMESTAMP, 101, 'pickup');";
+    // TODO: action for all removed orders
+
     inuseConnections.remove(connection);
+    connectionPool.add(connection);
+  }
+
+  public void updateFoodFreshness() throws SQLException {
+    var connection = connectionPool.poll();
+    var statement = connection.createStatement();
+
+    String querySQL = ""; // TODO: decrease all food freshness by 1 second (which is measured in milliseconds)
+    ResultSet rs = statement.executeQuery(querySQL);
+
+    inuseConnections.remove(connection);
+    connectionPool.add(connection);
+
   }
 }

@@ -93,10 +93,11 @@ public class KitchenApplication {
 
   private void pickupOrder() {
     try {
-      // every second?
       // go through all orders and random if the order is getting picked up (that retains the randomness)
       // from minPickUp to maxPickup
       // there is a timestamp
+      // pickup table
+      // schedule thread?
       var pickUp = random.nextBoolean();
       if (pickUp) {
         // add to action
